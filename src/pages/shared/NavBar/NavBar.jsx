@@ -1,25 +1,34 @@
+import { use, useState } from "react";
 import { NavLink } from "react-router";
+import { AuthContext } from "../../../context/AuthContext/AuthContext";
+import toast from "react-hot-toast";
 
 export const NavBar = () => {
+  const { user, signOutUser } = use(AuthContext);
+  const [open, setOpen] = useState(false);
+
   const links = (
     <>
+      <li>
+        <NavLink to="/">Home</NavLink>
+      </li>
       <li>
         <NavLink to="/clubs">Clubs</NavLink>
       </li>
       <li>
         <NavLink to="/events">Events</NavLink>
       </li>
-      <li>
-        <NavLink to="/register">Register</NavLink>
-      </li>
-      <li>
-        <NavLink to="/login">Login</NavLink>
-      </li>
     </>
   );
+
+  const handleLogout = () => {
+    signOutUser();
+    toast.success("Log out successful");
+  };
+
   return (
-    <div className="navbar bg-base-100 shadow-sm">
-      <div className="navbar-start">
+    <div className="navbar bg-base-100 shadow-sm md:px-10 ">
+      <NavLink className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
             <svg
@@ -67,13 +76,48 @@ export const NavBar = () => {
             />
           </svg>
         </a>
-        <h3 className="text-3xl text-red-900 font-bold ">clubNest</h3>
-      </div>
+        <h3 className="text-3xl text-red-900 font-bold -ms-2">clubNest</h3>
+      </NavLink>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">{links}</ul>
       </div>
       <div className="navbar-end">
-        <a className="btn">Button</a>
+        {user ? (
+          <div className="relative">
+            <img
+              src={user.photoURL}
+              alt="avatar"
+              className="w-10 h-10 rounded-full cursor-pointer"
+              onClick={() => setOpen(!open)}
+            />
+
+            {open && (
+              <ul className="absolute right-0 mt-2 bg-white shadow p-2 rounded">
+                <li>
+                  <NavLink to="/profile">Profile</NavLink>
+                </li>
+                <li>
+                  <NavLink to="/dashboard">Dashboard</NavLink>
+                </li>
+                <li className="cursor-pointer" onClick={handleLogout}>
+                  Logout
+                </li>
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="flex gap-x-3">
+            <NavLink className="btn btn-outline btn-info" to="/login">
+              Login
+            </NavLink>
+
+            <div className="hidden sm:block">
+              <NavLink className="btn btn-outline btn-primary" to="/register">
+                Register
+              </NavLink>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

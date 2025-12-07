@@ -1,7 +1,7 @@
 import { use } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation, NavLink } from "react-router";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 export const Login = () => {
@@ -35,7 +35,20 @@ export const Login = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      const user = result.user;
+
+      await fetch("http://localhost:3000/api/auth/save-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        }),
+      });
+
       toast.success("Logged in with Google!");
       navigate(from, { replace: true });
     } catch (err) {
@@ -43,6 +56,7 @@ export const Login = () => {
         .replace("Firebase:", "")
         .replace("auth/", "")
         .replace(/-/g, " ");
+
       toast.error(msg.charAt(0).toUpperCase() + msg.slice(1));
     }
   };
@@ -76,10 +90,22 @@ export const Login = () => {
           {errors.password && (
             <p className="text-red-600 text-sm">{errors.password.message}</p>
           )}
+          <p className="text-sm text-gray-600">
+            You don't have an account?{" "}
+            <NavLink
+              to="/register"
+              className="text-primary font-semibold hover:underline"
+            >
+              Register
+            </NavLink>
+          </p>
         </div>
 
-        <div className="mt-4 text-center">
-          <button type="submit" className="w-1/2 btn btn-soft btn-primary">
+        <div className="mt-6 text-center">
+          <button
+            type="submit"
+            className="md:w-1/2 w-full btn btn-soft btn-primary"
+          >
             Log in
           </button>
         </div>
@@ -89,7 +115,7 @@ export const Login = () => {
       <div className="mt-4 text-center">
         <button
           onClick={handleGoogleLogin}
-          className="w-1/2 btn bg-white text-black border-[#e5e5e5] cursor-pointer"
+          className="md:w-1/2 w-full btn bg-white text-black border-[#e5e5e5] cursor-pointer"
         >
           <svg
             aria-label="Google logo"

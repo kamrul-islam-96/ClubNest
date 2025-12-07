@@ -30,10 +30,25 @@ export const Register = () => {
       // Update profile
       await updateUserProfile(name, photoURL);
 
+      const firebaseUser = result.user;
+      const uid = firebaseUser.uid;
+
+      // Data save to MongoDB
+      await fetch("http://localhost:3000/api/auth/save-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid,
+          name,
+          email,
+          photoURL,
+        }),
+      });
+
       // Success toast
       toast.success("Registration Successful!");
 
-      signOutUser()
+      signOutUser();
 
       // Redirect
       navigate(from, { replace: true });
@@ -51,9 +66,22 @@ export const Register = () => {
   // GOOGLE SIGNUP
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      const user = result.user;
+
+      await fetch("http://localhost:3000/api/auth/save-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        }),
+      });
+
       toast.success("Logged in with Google!");
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       const msg = err.message
         .replace("Firebase:", "")
@@ -134,7 +162,10 @@ export const Register = () => {
 
         {/* REGISTER BUTTON */}
         <div className="mt-4 text-center">
-          <button type="submit" className="w-1/2 btn btn-soft btn-primary">
+          <button
+            type="submit"
+            className="md:w-1/2 w-full btn btn-soft btn-primary"
+          >
             Register
           </button>
         </div>
@@ -144,7 +175,7 @@ export const Register = () => {
       <div className="mt-4 text-center">
         <button
           onClick={handleGoogleLogin}
-          className="w-1/2 btn bg-white text-black border-[#e5e5e5] cursor-pointer"
+          className="md:w-1/2 w-full btn bg-white text-black border-[#e5e5e5] cursor-pointer"
         >
           <svg
             aria-label="Google logo"

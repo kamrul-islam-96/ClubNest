@@ -5,6 +5,8 @@ import { AllClubs } from "../pages/Clubs/AllClubs/AllClubs";
 import { UpComingEvents } from "../pages/Events/UpComingEvents/UpComingEvents";
 import { Register } from "../pages/Register/Register";
 import { Login } from "../pages/Login/Login";
+import { DashBoard } from "../pages/DashBoard/DashBoard";
+import { Profile } from "../pages/Profile/Profile";
 ;
 
 export const router = createBrowserRouter([
@@ -31,6 +33,14 @@ export const router = createBrowserRouter([
             {
                 path: '/login',
                 Component: Login,
+            },
+            {
+                path: '/dashboard',
+                Component: DashBoard,
+            },
+            {
+                path: '/profile',
+                Component: Profile,
             },
         ]
     }
