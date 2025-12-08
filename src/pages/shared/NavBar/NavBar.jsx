@@ -2,6 +2,7 @@ import { use, useState } from "react";
 import { NavLink } from "react-router";
 import { AuthContext } from "../../../context/AuthContext/AuthContext";
 import toast from "react-hot-toast";
+import { Calendar1, Club, House } from "lucide-react";
 
 export const NavBar = () => {
   const { user, signOutUser } = use(AuthContext);
@@ -10,13 +11,13 @@ export const NavBar = () => {
   const links = (
     <>
       <li>
-        <NavLink to="/">Home</NavLink>
+        <NavLink to="/"><House size={22} /> Home</NavLink>
       </li>
       <li>
-        <NavLink to="/clubs">Clubs</NavLink>
+        <NavLink to="/clubs"><Club size={22} /> Clubs</NavLink>
       </li>
       <li>
-        <NavLink to="/events">Events</NavLink>
+        <NavLink to="/events"><Calendar1 size={22} /> Events</NavLink>
       </li>
     </>
   );
@@ -54,7 +55,7 @@ export const NavBar = () => {
             {links}
           </ul>
         </div>
-        <a>
+        <div>
           <svg
             width="48"
             height="48"
@@ -75,7 +76,7 @@ export const NavBar = () => {
               stroke-linecap="round"
             />
           </svg>
-        </a>
+        </div>
         <h3 className="text-3xl text-red-900 font-bold -ms-2">clubNest</h3>
       </NavLink>
       <div className="navbar-center hidden lg:flex">
@@ -97,7 +98,7 @@ export const NavBar = () => {
                   <NavLink to="/profile">Profile</NavLink>
                 </li>
                 <li>
-                  <NavLink to="/dashboard">Dashboard</NavLink>
+                  <NavLink to="/dashboard/admin">Dashboard</NavLink>
                 </li>
                 <li className="cursor-pointer" onClick={handleLogout}>
                   Logout

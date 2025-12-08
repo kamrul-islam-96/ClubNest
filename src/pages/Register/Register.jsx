@@ -36,12 +36,16 @@ export const Register = () => {
       // Data save to MongoDB
       await fetch("http://localhost:3000/api/auth/save-user", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           uid,
           name,
           email,
           photoURL,
+          role: "member",
         }),
       });
 
@@ -71,7 +75,10 @@ export const Register = () => {
 
       await fetch("http://localhost:3000/api/auth/save-user", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           uid: user.uid,
           name: user.displayName,
