@@ -28,7 +28,7 @@ const DashBoardNavbar = () => {
                   }`
                 }
               >
-                <Icon size={22} className="flex-shrink-0" />
+                <Icon size={22} className="shrink-0" />
                 <span className="hidden sm:block text-sm sm:text-base">
                   {item.label}
                 </span>

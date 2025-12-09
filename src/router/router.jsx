@@ -10,6 +10,9 @@ import { DashboardLayout } from "../layout/DashboardLayout";
 import { AdminPanel } from "../pages/DashBoard/AdminPanel/AdminPanel";
 import { ManageUsers } from "../pages/DashBoard/ClubManager/ManageUsers";
 import { MemberDashboard } from "../pages/DashBoard/Member/MemberDashboard";
+import { MyClubs } from "../pages/DashBoard/ClubManager/MyClubs/MyClubs";
+import { ClubMangerLayout } from "../layout/ClubMangerLayout";
+import { CreateClub } from "../Components/CreateClub";
 
 
 
@@ -48,7 +51,21 @@ export const router = createBrowserRouter([
           },
           {
             path: "manager",
-            Component: ManageUsers,
+            Component: ClubMangerLayout,
+            children: [
+              {
+                index: true,
+                Component: ManageUsers,
+              },
+              {
+                path: 'my-clubs',
+                Component: MyClubs,
+              },
+              {
+                path: 'create-club',
+                Component: CreateClub,
+              },
+            ]
           },
           {
             path: "member",

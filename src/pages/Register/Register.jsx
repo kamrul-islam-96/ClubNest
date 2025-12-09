@@ -32,6 +32,7 @@ export const Register = () => {
 
       const firebaseUser = result.user;
       const uid = firebaseUser.uid;
+      const token = await firebaseUser.getIdToken();
 
       // Data save to MongoDB
       await fetch("http://localhost:3000/api/auth/save-user", {
@@ -72,6 +73,7 @@ export const Register = () => {
     try {
       const result = await signInWithGoogle();
       const user = result.user;
+      const token = await user.getIdToken();
 
       await fetch("http://localhost:3000/api/auth/save-user", {
         method: "POST",
