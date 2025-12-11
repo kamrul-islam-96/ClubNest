@@ -10,6 +10,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { toast } from "react-hot-toast";
+import { ChartBarStacked, MapPin, MapPinCheck, Users } from "lucide-react";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
 
@@ -202,9 +203,9 @@ export const ClubDetails = () => {
         <h1 className="text-3xl font-bold">{club.clubName}</h1>
         <p className="text-gray-600">{club.description}</p>
         <div className="flex gap-4 text-sm text-gray-500 flex-wrap">
-          <span>📂 {club.category}</span>
-          <span>📍 {club.location}</span>
-          <span>👥 Members: {club.membersCount || 0}</span>
+          <span><ChartBarStacked /> {club.category}</span>
+          <span><MapPinCheck /> {club.location}</span>
+          <span><Users /> Members: {club.membersCount || 0}</span>
         </div>
         {club.membershipFee > 0 ? (
           <p className="text-green-600 font-semibold text-lg">
