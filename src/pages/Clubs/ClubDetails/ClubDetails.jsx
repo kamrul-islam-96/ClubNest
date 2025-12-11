@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { use, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../../context/AuthContext/AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -13,8 +13,8 @@ import { toast } from "react-hot-toast";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PK);
 
-// Paid membership payment form component
-const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
+// Stripe Checkout Form Component
+const CheckoutForm = ({ club, user, onPaymentSuccess, membershipId }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -24,8 +24,9 @@ const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
     setLoading(true);
 
     try {
-      // Create payment intent
       const token = await user.getIdToken();
+
+      // Create Payment Intent in backend
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/create-payment-intent`,
         {
@@ -42,10 +43,9 @@ const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
           }),
         }
       );
-
       const { clientSecret } = await res.json();
 
-      // Confirm card payment
+      // Confirm card payment via Stripe
       const cardElement = elements.getElement(CardElement);
       const { error, paymentIntent } = await stripe.confirmCardPayment(
         clientSecret,
@@ -56,10 +56,9 @@ const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
           },
         }
       );
-
       if (error) throw new Error(error.message);
 
-      // Confirm membership in backend
+      // Confirm membership in backend after successful payment
       const confirmRes = await fetch(
         `${import.meta.env.VITE_API_URL}/memberships/${membershipId}/confirm`,
         {
@@ -71,12 +70,11 @@ const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
           body: JSON.stringify({ paymentId: paymentIntent.id }),
         }
       );
-
       const confirmData = await confirmRes.json();
       if (!confirmRes.ok)
         throw new Error(confirmData.message || "Payment failed");
 
-      toast.success("Joined Successfully");
+      toast.success("Membership Activated!");
       onPaymentSuccess();
     } catch (err) {
       toast.error(err.message);
@@ -99,14 +97,17 @@ const CheckoutForm = ({ club, user, onPaymentSuccess,membershipId }) => {
   );
 };
 
+
+// Club Details Component
 export const ClubDetails = () => {
   const { id } = useParams();
-  const { user } = use(AuthContext);
+  const { user } = useContext(AuthContext);
   const queryClient = useQueryClient();
+
   const [joined, setJoined] = useState(false);
   const [membershipId, setMembershipId] = useState(null);
 
-
+  // Fetch club details
   const {
     data: club = {},
     isLoading,
@@ -116,20 +117,17 @@ export const ClubDetails = () => {
     queryFn: async () => {
       const token = user ? await user.getIdToken() : null;
       const res = await fetch(`${import.meta.env.VITE_API_URL}/clubs/${id}`, {
-        headers: {
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      if (!res.ok) throw new Error("Failed to fetch data");
+      if (!res.ok) throw new Error("Failed to fetch club");
       return res.json();
     },
   });
 
   // Free membership mutation
-  const joinMutation = useMutation({
+  const joinFreeMutation = useMutation({
     mutationFn: async () => {
       if (!user) throw new Error("Please login first");
-
       const token = await user.getIdToken();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/memberships`, {
         method: "POST",
@@ -137,25 +135,42 @@ export const ClubDetails = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          userEmail: user.email,
-          clubId: club._id,
-        }),
+        body: JSON.stringify({ userEmail: user.email, clubId: club._id }),
       });
-
       const data = await res.json();
-      setMembershipId(data.membershipId)
+      setMembershipId(data.membershipId);
       if (!res.ok) throw new Error(data.message || "Failed to join club");
       return data;
     },
     onSuccess: () => {
-      toast.success("Club Joined Successfully");
-      queryClient.invalidateQueries(["clubDetails", id]);
+      toast.success("You have joined this club!");
       setJoined(true);
+      queryClient.invalidateQueries(["clubDetails", id]);
     },
-    onError: (err) => {
-      toast.error(err.message);
+    onError: (err) => toast.error(err.message),
+  });
+
+  //Paid membership creation mutation
+  const createPaidMembership = useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error("Please login first");
+      const token = await user.getIdToken();
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/memberships`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userEmail: user.email, clubId: club._id }),
+      });
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.message || "Failed to create membership");
+      setMembershipId(data.membershipId);
+      return data;
     },
+    onSuccess: () => toast.success("Membership created! Proceed to payment."),
+    onError: (err) => toast.error(err.message),
   });
 
   if (isLoading)
@@ -164,7 +179,6 @@ export const ClubDetails = () => {
         <span className="loading loading-bars loading-lg"></span>
       </div>
     );
-
   if (error || !club._id)
     return (
       <p className="text-red-500 text-center mt-6">
@@ -174,7 +188,7 @@ export const ClubDetails = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Banner Image */}
+      {/* Banner */}
       {club.bannerImage && (
         <img
           src={club.bannerImage}
@@ -188,8 +202,8 @@ export const ClubDetails = () => {
         <h1 className="text-3xl font-bold">{club.clubName}</h1>
         <p className="text-gray-600">{club.description}</p>
         <div className="flex gap-4 text-sm text-gray-500 flex-wrap">
-          <span>📂 Category: {club.category}</span>
-          <span>📍 Location: {club.location}</span>
+          <span>📂 {club.category}</span>
+          <span>📍 {club.location}</span>
           <span>👥 Members: {club.membersCount || 0}</span>
         </div>
         {club.membershipFee > 0 ? (
@@ -205,35 +219,48 @@ export const ClubDetails = () => {
       <div className="p-4 bg-gray-50 rounded-xl border shadow-sm">
         <h3 className="text-lg font-semibold mb-1">Club Manager</h3>
         <p>Name: {club.managerName || "Unknown"}</p>
-        <p>Email: {club.managerEmail || "Not Available"}</p>
+        <p>Email: {club.managerEmail || "N/A"}</p>
       </div>
 
-      {/* Join Button or Payment */}
+      {/* Join / Payment */}
       <div>
-        {!joined && user && club.membershipFee === 0 && (
+        {/* Free membership */}
+        {!joined && user && club.membershipFee <= 0 && (
           <button
-            onClick={() => joinMutation.mutate()}
+            onClick={() => joinFreeMutation.mutate()}
             className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Join Club
           </button>
         )}
 
+        {/* Paid membership */}
         {!joined && user && club.membershipFee > 0 && (
-          <Elements stripe={stripePromise}>
-            <CheckoutForm
-              club={club}
-              user={user}
-              membershipId={membershipId} 
-              onPaymentSuccess={() => setJoined(true)}
-            />
-          </Elements>
+          <>
+            {!membershipId && (
+              <button
+                onClick={() => createPaidMembership.mutate()}
+                className="px-5 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 cursor-pointer"
+              >
+                Start Payment
+              </button>
+            )}
+            {membershipId && (
+              <Elements stripe={stripePromise}>
+                <CheckoutForm
+                  club={club}
+                  user={user}
+                  membershipId={membershipId}
+                  onPaymentSuccess={() => setJoined(true)}
+                />
+              </Elements>
+            )}
+          </>
         )}
 
         {!user && (
           <p className="text-red-500">Please login to join this club.</p>
         )}
-
         {joined && (
           <p className="text-green-600 font-semibold mt-2">
             You have joined this club!
