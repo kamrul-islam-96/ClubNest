@@ -1,38 +1,80 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { toast } from "react-hot-toast";
+import { AuthContext } from "../../../../context/AuthContext/AuthContext";
 
 export const ManageUsersRole = () => {
   const [users, setUsers] = useState([]);
+  const { user } = useContext(AuthContext); 
+  const [userRole, setUserRole] = useState("");
 
-  // Fetch all users
+  // Logged-in user's role fetch করা
+  const fetchUserRole = async () => {
+    if (!user?.email) return;
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/role?email=${user.email}`
+      );
+      const data = await res.json();
+      setUserRole(data.role);
+    } catch (err) {
+      console.error("Failed to fetch user role", err);
+    }
+  };
+
+  // সব user fetch করা
   const fetchUsers = async () => {
-    const res = await fetch("http://localhost:3000/api/users");
-    const data = await res.json();
-    setUsers(data);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`);
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      toast.error("Failed to fetch users");
+      console.error(err);
+    }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUserRole(); 
+    fetchUsers();   
+  }, [user?.email]);
 
-  // Update Role
+  // Role update handler
   const handleRoleUpdate = async (email, newRole) => {
-    const token = localStorage.getItem("firebaseToken");
+    if (!userRole || userRole !== "admin") {
+      toast.error("শুধু Admins role update করতে পারে!");
+      return;
+    }
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users/role`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, 
-      },
-      body: JSON.stringify({ email, newRole }),
-    });
+    if (email === user?.email && newRole !== "admin") {
+      toast.error("Admin নিজের role কমাতে পারে না!");
+      return;
+    }
 
-    const data = await res.json();
-    if (data.success) {
-      alert("Role Updated Successfully!");
-      fetchUsers();
-    } else {
-      alert(data.message);
+    try {
+      const token = await user.getIdToken(); 
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/users/role`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ email, newRole }),
+        }
+      );
+
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Role updated to ${newRole}`);
+        fetchUsers(); 
+      } else {
+        toast.error(data.message || "Role update failed");
+      }
+    } catch (err) {
+      toast.error(err.message || "Network error");
+      console.error(err);
     }
   };
 
@@ -50,42 +92,49 @@ export const ManageUsersRole = () => {
               <th className="text-right">Actions</th>
             </tr>
           </thead>
-
           <tbody>
-            {users.map((user) => (
-              <tr key={user.uid} className="border-b">
-                <td className="py-3">{user.name}</td>
-                <td>{user.email}</td>
-                <td>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm">
-                    {user.role}
-                  </span>
-                </td>
+            {users.map((userRow) => {
+              const isSelf = userRow.email === user?.email;
 
-                <td className="text-right space-x-2">
-                  <button
-                    onClick={() => handleRoleUpdate(user.email, "admin")}
-                    className="px-3 py-1 bg-green-600 text-white rounded-lg"
-                  >
-                    Make Admin
-                  </button>
+              return (
+                <tr key={userRow.uid} className="border-b">
+                  <td className="py-3">{userRow.name}</td>
+                  <td>{userRow.email}</td>
+                  <td>
+                    <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm">
+                      {userRow.role}
+                    </span>
+                  </td>
+                  <td className="text-right space-x-2">
+                    <button
+                      onClick={() => handleRoleUpdate(userRow.email, "admin")}
+                      disabled={userRole !== "admin" || isSelf}
+                      className="px-3 py-1 bg-green-600 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Make Admin
+                    </button>
 
-                  <button
-                    onClick={() => handleRoleUpdate(user.email, "clubManager")}
-                    className="px-3 py-1 bg-purple-600 text-white rounded-lg"
-                  >
-                    Club Manager
-                  </button>
+                    <button
+                      onClick={() =>
+                        handleRoleUpdate(userRow.email, "clubManager")
+                      }
+                      disabled={userRole !== "admin" || isSelf}
+                      className="px-3 py-1 bg-purple-600 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Club Manager
+                    </button>
 
-                  <button
-                    onClick={() => handleRoleUpdate(user.email, "member")}
-                    className="px-3 py-1 bg-blue-600 text-white rounded-lg"
-                  >
-                    Member
-                  </button>
-                </td>
-              </tr>
-            ))}
+                    <button
+                      onClick={() => handleRoleUpdate(userRow.email, "member")}
+                      disabled={userRole !== "admin" || isSelf}
+                      className="px-3 py-1 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+                    >
+                      Member
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
