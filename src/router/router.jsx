@@ -14,6 +14,10 @@ import { MyClubs } from "../pages/DashBoard/ClubManager/MyClubs/MyClubs";
 import { ClubMangerLayout } from "../layout/ClubMangerLayout";
 import { CreateClub } from "../Components/CreateClub";
 import { ClubDetails } from "../pages/Clubs/ClubDetails/ClubDetails";
+import { AdminPanelLayout } from "../layout/AdminPanelLayout";
+import { ManageUsersRole } from "../pages/DashBoard/AdminPanel/ManageUsers/ManageUsersRole";
+import { ManageClubs } from "../pages/DashBoard/AdminPanel/ManageClubs/ManageClubs";
+import { ManagePayments } from "../pages/DashBoard/AdminPanel/ManagePayments/ManagePayments";
 
 
 
@@ -52,7 +56,25 @@ export const router = createBrowserRouter([
         children: [
           {
             path:'admin',
-            Component: AdminPanel,
+            Component: AdminPanelLayout,
+            children: [
+              {
+                index: true,
+                Component: AdminPanel,
+              },
+              {
+                path: 'manage-users',
+                Component: ManageUsersRole,
+              },
+              {
+                path: 'manage-clubs',
+                Component: ManageClubs,
+              },
+              {
+                path: 'payments',
+                Component: ManagePayments,
+              },
+            ]
           },
           {
             path: "manager",

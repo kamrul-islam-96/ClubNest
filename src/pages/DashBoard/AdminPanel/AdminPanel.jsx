@@ -30,17 +30,17 @@ export const AdminPanel = () => {
         <DashboardLink
           title="Manage Users"
           description="View & update user roles"
-          to="/dashboard/manage-users"
+          to="/dashboard/admin/manage-users"
         />
         <DashboardLink
           title="Manage Clubs"
           description="Approve or reject clubs"
-          to="/dashboard/manage-clubs"
+          to="/dashboard/admin/manage-clubs"
         />
         <DashboardLink
           title="Payments"
           description="View all transactions"
-          to="/dashboard/payments"
+          to="/dashboard/admin/payments"
         />
       </div>
     </div>
