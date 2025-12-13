@@ -1,189 +1,133 @@
-import { useState, useContext } from "react";
-import { NavLink } from "react-router";
+import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext/AuthContext";
-
-// Helper components
-const SummaryCard = ({ title, value }) => (
-  <div className="bg-white p-4 sm:p-6 rounded-xl shadow flex flex-col items-start sm:items-center">
-    <span className="text-gray-500 text-sm sm:text-base">{title}</span>
-    <span className="text-2xl sm:text-3xl font-bold mt-1 sm:mt-2">{value}</span>
-  </div>
-);
-
-const ClubCard = ({ club }) => (
-  <div className="bg-white p-4 rounded-xl shadow flex flex-col gap-2 hover:shadow-md transition">
-    <h3 className="font-semibold text-lg sm:text-xl">{club.name}</h3>
-    <p className="text-sm sm:text-base">{club.location}</p>
-    <p className="text-sm sm:text-base">Status: {club.membershipStatus}</p>
-    <p className="text-sm sm:text-base">Expiry: {club.expiryDate}</p>
-    <NavLink
-      to={`/clubs/${club.id}`}
-      className="mt-2 text-blue-600 text-sm sm:text-base hover:underline"
-    >
-      View Details
-    </NavLink>
-  </div>
-);
-
-const EventRow = ({ event }) => (
-  <tr className="border-b hover:bg-gray-50">
-    <td className="px-2 sm:px-4 py-2 text-sm sm:text-base">{event.title}</td>
-    <td className="px-2 sm:px-4 py-2 text-sm sm:text-base">{event.clubName}</td>
-    <td className="px-2 sm:px-4 py-2 text-sm sm:text-base">{event.date}</td>
-    <td className="px-2 sm:px-4 py-2 text-sm sm:text-base">{event.status}</td>
-  </tr>
-);
+import axios from "axios";
 
 export const MemberDashboard = () => {
   const { user } = useContext(AuthContext);
+  const [summary, setSummary] = useState({});
+  const [myClubs, setMyClubs] = useState([]);
+  const [payments, setPayments] = useState([]);
 
-  // Placeholder data
-  const [summary] = useState({ clubsJoined: 3, eventsRegistered: 5 });
-  const [myClubs] = useState([
-    {
-      id: 1,
-      name: "Chess Club",
-      location: "Building A",
-      membershipStatus: "Active",
-      expiryDate: "2025-06-30",
-    },
-    {
-      id: 2,
-      name: "Music Club",
-      location: "Building B",
-      membershipStatus: "Active",
-      expiryDate: "2025-07-15",
-    },
-  ]);
-  const [myEvents] = useState([
-    {
-      title: "Chess Tournament",
-      clubName: "Chess Club",
-      date: "2025-12-20",
-      status: "Registered",
-    },
-    {
-      title: "Music Concert",
-      clubName: "Music Club",
-      date: "2025-12-25",
-      status: "Registered",
-    },
-  ]);
-  const [payments] = useState([
-    {
-      amount: 50,
-      type: "Membership",
-      club: "Chess Club",
-      date: "2025-11-01",
-      status: "Paid",
-    },
-    {
-      amount: 30,
-      type: "Membership",
-      club: "Music Club",
-      date: "2025-11-15",
-      status: "Paid",
-    },
-  ]);
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchData = async () => {
+      try {
+        const token = await user.getIdToken();
+        const api = axios.create({
+          baseURL: import.meta.env.VITE_API_URL,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // summary
+        const summaryRes = await api.get(
+          `/api/member/summary?email=${user.email}`
+        );
+        setSummary(summaryRes.data);
+
+        // my clubs
+        const clubsRes = await api.get(`/api/member/clubs?email=${user.email}`);
+        setMyClubs(clubsRes.data);
+
+        // payments
+        const paymentsRes = await api.get(
+          `/api/member/payments?email=${user.email}`
+        );
+        setPayments(paymentsRes.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   return (
-    <div className="p-4 sm:p-6 space-y-8">
-      {/* Welcome */}
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
-        Welcome, {user?.displayName || "Member"}!
+    <div className="p-6 space-y-8">
+      <h1 className="text-3xl font-bold">
+        Welcome, {user?.displayName || "Member"}
       </h1>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <SummaryCard title="Clubs Joined" value={summary.clubsJoined} />
-        <SummaryCard
-          title="Events Registered"
-          value={summary.eventsRegistered}
-        />
+      {/* Summary */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow">
+          <p className="text-gray-500">Clubs Joined</p>
+          <p className="text-3xl font-bold">{summary.clubsJoined || 0}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow">
+          <p className="text-gray-500">Events Registered</p>
+          <p className="text-3xl font-bold">{summary.eventsRegistered || 0}</p>
+        </div>
       </div>
 
       {/* Upcoming Events */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow">
-        <h2 className="text-lg sm:text-xl font-semibold mb-2">
-          Upcoming Events
-        </h2>
-        <p className="text-sm sm:text-base text-gray-500">
-          This section will show upcoming events from your clubs.
-        </p>
+      <div className="bg-white p-6 rounded-xl shadow">
+        <h2 className="text-xl font-semibold">Upcoming Events</h2>
+        <p className="text-gray-500">Events module is coming soon 🚧</p>
       </div>
 
       {/* My Clubs */}
-      <div className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-semibold">My Clubs</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div>
+        <h2 className="text-2xl font-semibold mb-4">My Clubs</h2>
+        <div className="grid grid-cols-3 gap-6">
           {myClubs.map((club) => (
-            <ClubCard key={club.id} club={club} />
+            <div key={club.id} className="bg-white p-4 rounded-xl shadow">
+              <h3 className="font-semibold">{club.name}</h3>
+              <p>{club.location}</p>
+              <p>Status: {club.membershipStatus}</p>
+              <p>Expiry: {club.expiryDate}</p>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* My Events */}
-      <div className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-semibold">My Events</h2>
-        <div className="overflow-x-auto rounded-xl shadow">
-          <table className="min-w-full bg-white">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
-                  Event
-                </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
-                  Club
-                </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
-                  Date
-                </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {myEvents.map((event, idx) => (
-                <EventRow key={idx} event={event} />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {/* Payment History */}
-      <div className="space-y-4">
-        <h2 className="text-xl sm:text-2xl font-semibold">Payment History</h2>
-        <div className="overflow-x-auto rounded-xl shadow">
-          <table className="min-w-full bg-white">
-            <thead className="bg-gray-100">
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-6">Payment History</h2>
+        <div className="overflow-x-auto bg-white rounded-2xl shadow-lg">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
               <tr>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
-                  Type
-                </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                   Club
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-left text-sm sm:text-base">
+                <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {payments.map((pay, idx) => (
-                <tr key={idx} className="border-b hover:bg-gray-50">
-                  <td className="px-2 sm:px-4 py-2">${pay.amount}</td>
-                  <td className="px-2 sm:px-4 py-2">{pay.type}</td>
-                  <td className="px-2 sm:px-4 py-2">{pay.club}</td>
-                  <td className="px-2 sm:px-4 py-2">{pay.date}</td>
-                  <td className="px-2 sm:px-4 py-2">{pay.status}</td>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {payments.map((p, i) => (
+                <tr
+                  key={i}
+                  className="hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-800">
+                    ${p.amount}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                    {p.club}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                    {new Date(p.date).toLocaleDateString()}
+                  </td>
+                  <td
+                    className={`px-6 py-4 whitespace-nowrap font-semibold ${
+                      p.status === "Paid"
+                        ? "text-green-600"
+                        : p.status === "Free"
+                        ? "text-blue-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {p.status}
+                  </td>
                 </tr>
               ))}
             </tbody>
