@@ -42,12 +42,12 @@ export const ManageUsersRole = () => {
   // Role update handler
   const handleRoleUpdate = async (email, newRole) => {
     if (!userRole || userRole !== "admin") {
-      toast.error("শুধু Admins role update করতে পারে!");
+      toast.error("Only Admins can change role");
       return;
     }
 
     if (email === user?.email && newRole !== "admin") {
-      toast.error("Admin নিজের role কমাতে পারে না!");
+      toast.error("Admin can not change his role");
       return;
     }
 

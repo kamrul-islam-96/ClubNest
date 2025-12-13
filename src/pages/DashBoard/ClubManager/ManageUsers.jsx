@@ -1,11 +1,11 @@
 import { DashboardLink } from '../../../Components/DashboardLink'
 import { SummaryCard } from '../../../Components/SummaryCard'
-import { useState, useContext } from "react";
+import { useState, use } from "react";
 import { AuthContext } from '../../../context/AuthContext/AuthContext';
 
 
 export const ManageUsers = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = use(AuthContext);
 
   // Placeholder states (to replace with TanStack Query fetch)
   const [summary, setSummary] = useState({
