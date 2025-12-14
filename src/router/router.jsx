@@ -19,6 +19,10 @@ import { ManageUsersRole } from "../pages/DashBoard/AdminPanel/ManageUsers/Manag
 import { ManageClubs } from "../pages/DashBoard/AdminPanel/ManageClubs/ManageClubs";
 import { ManagePayments } from "../pages/DashBoard/AdminPanel/ManagePayments/ManagePayments";
 import { ClubMembers } from "../pages/DashBoard/ClubManager/ClubMembers/ClubMembers";
+import { EventsManagement } from "../pages/DashBoard/ClubManager/EventsManagement/EventsManagement";
+import { CreateEvents } from "../Components/CreateEvents";
+import { EventDetails } from "../pages/Events/EventDetails/EventDetails";
+import { EventsRegistrations } from "../pages/DashBoard/ClubManager/EventsRegistrations/EventsRegistrations";
 
 
 
@@ -42,6 +46,10 @@ export const router = createBrowserRouter([
       {
         path: "/events",
         Component: UpComingEvents,
+      },
+      {
+        path: "/events/:id",
+        Component: EventDetails,
       },
       {
         path: "/register",
@@ -96,6 +104,18 @@ export const router = createBrowserRouter([
               {
                 path: 'club-members',
                 Component: ClubMembers,
+              },
+              {
+                path: 'events',
+                Component: EventsManagement,
+              },
+              {
+                path: 'create-event',
+                Component: CreateEvents,
+              },
+              {
+                path: 'event-registrations',
+                Component: EventsRegistrations,
               },
             ]
           },

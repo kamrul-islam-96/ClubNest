@@ -9,7 +9,7 @@ export const ManageUsers = () => {
   const { user } = use(AuthContext);
   const [token, setToken] = useState(null);
 
-  // ✅ Async token fetch
+  // Async token fetch
   useEffect(() => {
     if (user) {
       user.getIdToken().then((idToken) => setToken(idToken));
@@ -45,7 +45,7 @@ export const ManageUsers = () => {
         Club Manager Dashboard
       </h1>
 
-      {/* ✅ Summary Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <SummaryCard title="Total Clubs" value={totalClubs} />
         <SummaryCard title="Total Members" value={totalMembers} />
@@ -53,7 +53,7 @@ export const ManageUsers = () => {
         <SummaryCard title="Total Payments" value={totalPayments} />
       </div>
 
-      {/* ✅ Navigation */}
+      {/* Navigation */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <DashboardLink
           title="My Clubs"
