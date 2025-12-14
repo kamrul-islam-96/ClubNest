@@ -11,7 +11,7 @@ export const MyClubs = () => {
     queryKey: ["myClubs", user?.email],
     queryFn: async () => {
       const res = await fetch(
-        `http://localhost:3000/clubs?managerEmail=${user.email}`
+        `${import.meta.env.VITE_API_URL}/clubs?managerEmail=${user.email}`
       );
       return res.json();
     },
