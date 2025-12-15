@@ -32,7 +32,6 @@ export const ManageClubs = () => {
       setClubs(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error(err);
-      alert("Error loading clubs. Check console.");
     } finally {
       setLoading(false);
     }
