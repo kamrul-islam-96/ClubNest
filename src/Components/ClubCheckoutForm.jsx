@@ -1,8 +1,7 @@
-// components/ClubCheckoutForm.jsx
 import { useState } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "react-hot-toast";
-import { Loader2, CreditCard, CheckCircle } from "lucide-react";
+import { Loader2, CreditCard, CheckCircle, XCircle } from "lucide-react";
 
 export const ClubCheckoutForm = ({
   club,
@@ -36,7 +35,7 @@ export const ClubCheckoutForm = ({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            amount: Math.round(club.membershipFee * 100), // Ensure integer
+            amount: Math.round(club.membershipFee * 100),
             currency: "usd",
             userEmail: user.email,
             clubId: club._id,
@@ -52,8 +51,11 @@ export const ClubCheckoutForm = ({
 
       const { clientSecret } = await res.json();
 
-      // Confirm card payment via Stripe
       const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        throw new Error("Card element not found");
+      }
+
       const { error, paymentIntent } = await stripe.confirmCardPayment(
         clientSecret,
         {
@@ -72,7 +74,7 @@ export const ClubCheckoutForm = ({
         throw new Error(error.message);
       }
 
-      // Confirm membership in backend after successful payment
+      // Confirm membership
       const confirmRes = await fetch(
         `${import.meta.env.VITE_API_URL}/memberships/${membershipId}/confirm`,
         {
@@ -106,19 +108,27 @@ export const ClubCheckoutForm = ({
   return (
     <div className="mt-6 p-6 border rounded-xl bg-white shadow">
       <div className="mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <CreditCard className="w-6 h-6 text-green-600" />
-          <h3 className="text-lg font-semibold">Complete Payment</h3>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <CreditCard className="w-6 h-6 text-green-600" />
+            <h3 className="text-lg font-semibold">Complete Payment</h3>
+          </div>
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm rounded-full">
+            Pending
+          </span>
         </div>
-        <p className="text-gray-600">
-          Club: <span className="font-medium">{club.clubName}</span>
-        </p>
-        <p className="text-lg font-bold text-green-700 mt-1">
-          Amount: ${club.membershipFee}
-        </p>
-        <p className="text-sm text-gray-500 mt-1">
-          Membership ID: {membershipId}
-        </p>
+
+        <div className="space-y-2">
+          <p className="text-gray-600">
+            Club: <span className="font-medium">{club.clubName}</span>
+          </p>
+          <p className="text-lg font-bold text-green-700">
+            Amount: ${club.membershipFee}
+          </p>
+          <p className="text-sm text-gray-500">
+            Membership ID: <span className="font-mono">{membershipId}</span>
+          </p>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -137,7 +147,10 @@ export const ClubCheckoutForm = ({
             }}
           />
           {cardError && (
-            <p className="text-red-500 text-sm mt-1">{cardError}</p>
+            <div className="flex items-center gap-2 mt-1 text-red-500 text-sm">
+              <XCircle className="w-4 h-4" />
+              {cardError}
+            </div>
           )}
         </div>
 
