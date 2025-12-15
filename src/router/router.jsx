@@ -24,6 +24,7 @@ import { CreateEvents } from "../Components/CreateEvents";
 import { EventDetails } from "../pages/Events/EventDetails/EventDetails";
 import { EventsRegistrations } from "../pages/DashBoard/ClubManager/EventsRegistrations/EventsRegistrations";
 import { EditClub } from "../Components/EditClub";
+import { EditEvent } from "../Components/EditEvent";
 
 
 
@@ -113,6 +114,10 @@ export const router = createBrowserRouter([
               {
                 path: 'events',
                 Component: EventsManagement,
+              },
+              {
+                path: 'edit-event/:id',
+                Component: EditEvent,
               },
               {
                 path: 'create-event',
