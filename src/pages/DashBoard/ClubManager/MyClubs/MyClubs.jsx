@@ -42,7 +42,8 @@ export const MyClubs = () => {
       );
 
       if (!res.ok) {
-        throw new Error("Failed to delete club");
+        const data = await res.json();
+        throw new Error(data.message);
       }
       return res.json();
     },
