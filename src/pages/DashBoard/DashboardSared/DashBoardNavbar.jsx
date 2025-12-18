@@ -12,7 +12,7 @@ const DashBoardNavbar = () => {
     <div className="fixed inset-y-0 left-0 w-20 sm:w-64 text-white flex flex-col z-40">
       {/* Centered Menu Items */}
       <nav className="flex-1 flex items-center justify-center">
-        <div className="space-y-6 w-full px-4">
+        <div className="space-y-6 w-full md:px-4 pr-8">
           {menuItems.map((item) => {
             const Icon = item.icon;
             return (

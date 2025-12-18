@@ -164,7 +164,7 @@ export const EventsRegistrations = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pl-6 pr-2">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -178,7 +178,7 @@ export const EventsRegistrations = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg shadow border">
           <div className="flex items-center justify-between">
             <div>

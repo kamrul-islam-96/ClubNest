@@ -4,7 +4,7 @@ import { AuthContext } from "../../../../context/AuthContext/AuthContext";
 
 export const ManageUsersRole = () => {
   const [users, setUsers] = useState([]);
-  const { user } = useContext(AuthContext); 
+  const { user } = useContext(AuthContext);
   const [userRole, setUserRole] = useState("");
 
   // Logged-in user's role fetch করা
@@ -22,7 +22,7 @@ export const ManageUsersRole = () => {
     }
   };
 
-  // সব user fetch করা
+  // fetch all data
   const fetchUsers = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/users`);
@@ -35,8 +35,8 @@ export const ManageUsersRole = () => {
   };
 
   useEffect(() => {
-    fetchUserRole(); 
-    fetchUsers();   
+    fetchUserRole();
+    fetchUsers();
   }, [user?.email]);
 
   // Role update handler
@@ -52,7 +52,7 @@ export const ManageUsersRole = () => {
     }
 
     try {
-      const token = await user.getIdToken(); 
+      const token = await user.getIdToken();
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/users/role`,
         {
@@ -68,7 +68,7 @@ export const ManageUsersRole = () => {
       const data = await res.json();
       if (data.success) {
         toast.success(`Role updated to ${newRole}`);
-        fetchUsers(); 
+        fetchUsers();
       } else {
         toast.error(data.message || "Role update failed");
       }
@@ -82,61 +82,127 @@ export const ManageUsersRole = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Manage Users</h1>
 
-      <div className="bg-white rounded-xl shadow p-6 overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b text-gray-600">
-              <th className="py-3">Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th className="text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((userRow) => {
-              const isSelf = userRow.email === user?.email;
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Desktop View: Table (Hidden on Mobile) */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
+                <th className="px-6 py-4 font-semibold">User Information</th>
+                <th className="px-6 py-4 font-semibold">Current Role</th>
+                <th className="px-6 py-4 text-right font-semibold">
+                  Manage Role
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {users.map((userRow) => {
+                const isSelf = userRow.email === user?.email;
+                return (
+                  <tr
+                    key={userRow.uid}
+                    className="hover:bg-gray-50/50 transition-colors"
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-gray-900">
+                          {userRow.name}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {userRow.email}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100">
+                        {userRow.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() =>
+                            handleRoleUpdate(userRow.email, "admin")
+                          }
+                          disabled={userRole !== "admin" || isSelf}
+                          className="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-lg hover:bg-slate-700 disabled:opacity-30 transition-all"
+                        >
+                          Admin
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleRoleUpdate(userRow.email, "clubManager")
+                          }
+                          disabled={userRole !== "admin" || isSelf}
+                          className="px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-30 transition-all"
+                        >
+                          Manager
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleRoleUpdate(userRow.email, "member")
+                          }
+                          disabled={userRole !== "admin" || isSelf}
+                          className="px-3 py-1.5 text-xs font-medium bg-white text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-30 transition-all"
+                        >
+                          Member
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
 
-              return (
-                <tr key={userRow.uid} className="border-b">
-                  <td className="py-3">{userRow.name}</td>
-                  <td>{userRow.email}</td>
-                  <td>
-                    <span className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-sm">
-                      {userRow.role}
-                    </span>
-                  </td>
-                  <td className="text-right space-x-2">
-                    <button
-                      onClick={() => handleRoleUpdate(userRow.email, "admin")}
-                      disabled={userRole !== "admin" || isSelf}
-                      className="px-3 py-1 bg-green-600 text-white rounded-lg disabled:opacity-50"
-                    >
-                      Make Admin
-                    </button>
+        {/* Mobile View: Cards (Hidden on Desktop) */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {users.map((userRow) => {
+            const isSelf = userRow.email === user?.email;
+            return (
+              <div key={userRow.uid} className="p-5 space-y-4 bg-white">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className="font-bold text-gray-900">{userRow.name}</h4>
+                    <p className="text-sm text-gray-500 lowercase">
+                      {userRow.email}
+                    </p>
+                  </div>
+                  <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[10px] font-bold uppercase tracking-wider border border-blue-100">
+                    {userRow.role}
+                  </span>
+                </div>
 
-                    <button
-                      onClick={() =>
-                        handleRoleUpdate(userRow.email, "clubManager")
-                      }
-                      disabled={userRole !== "admin" || isSelf}
-                      className="px-3 py-1 bg-purple-600 text-white rounded-lg disabled:opacity-50"
-                    >
-                      Club Manager
-                    </button>
-
-                    <button
-                      onClick={() => handleRoleUpdate(userRow.email, "member")}
-                      disabled={userRole !== "admin" || isSelf}
-                      className="px-3 py-1 bg-blue-600 text-white rounded-lg disabled:opacity-50"
-                    >
-                      Member
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  <button
+                    onClick={() => handleRoleUpdate(userRow.email, "admin")}
+                    disabled={userRole !== "admin" || isSelf}
+                    className="py-2.5 text-[11px] font-bold bg-slate-800 text-white rounded-xl active:scale-95 disabled:opacity-30 transition-all"
+                  >
+                    ADMIN
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleRoleUpdate(userRow.email, "clubManager")
+                    }
+                    disabled={userRole !== "admin" || isSelf}
+                    className="py-2.5 text-[11px] font-bold bg-indigo-600 text-white rounded-xl active:scale-95 disabled:opacity-30 transition-all"
+                  >
+                    MANAGER
+                  </button>
+                  <button
+                    onClick={() => handleRoleUpdate(userRow.email, "member")}
+                    disabled={userRole !== "admin" || isSelf}
+                    className="py-2.5 text-[11px] font-bold bg-gray-100 text-gray-700 rounded-xl active:scale-95 disabled:opacity-30 transition-all"
+                  >
+                    MEMBER
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

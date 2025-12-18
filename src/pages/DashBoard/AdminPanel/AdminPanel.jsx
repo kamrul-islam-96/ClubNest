@@ -16,10 +16,10 @@ import {
 export const AdminPanel = () => {
   const { user } = useContext(AuthContext);
 
-  // 🔹 Chart data
+  //  Chart data
   const [chartData, setChartData] = useState([]);
 
-  // 🔹 Fetch Memberships per Club (Chart)
+  //  Fetch Memberships per Club (Chart)
   useEffect(() => {
     if (!user) return;
 
@@ -44,7 +44,7 @@ export const AdminPanel = () => {
     fetchChartData();
   }, [user]);
 
-  // 🔹 Fetch all users
+  //  Fetch all users
   const {
     data: users = [],
     isLoading: usersLoading,
@@ -62,7 +62,7 @@ export const AdminPanel = () => {
     enabled: !!user,
   });
 
-  // 🔹 Fetch all clubs
+  //  Fetch all clubs
   const {
     data: clubs = [],
     isLoading: clubsLoading,
@@ -80,7 +80,7 @@ export const AdminPanel = () => {
     enabled: !!user,
   });
 
-  // 🔹 Fetch all memberships
+  // Fetch all memberships
   const {
     data: memberships = [],
     isLoading: membershipsLoading,
@@ -101,7 +101,7 @@ export const AdminPanel = () => {
     enabled: !!user,
   });
 
-  // 🔹 Fetch all payments
+  // Fetch all payments
   const {
     data: payments = [],
     isLoading: paymentsLoading,
@@ -119,7 +119,7 @@ export const AdminPanel = () => {
     enabled: !!user,
   });
 
-  // 🔹 Loading
+  // Loading
   if (usersLoading || clubsLoading || membershipsLoading || paymentsLoading) {
     return (
       <div className="p-6 flex justify-center items-center h-40">
@@ -141,7 +141,7 @@ export const AdminPanel = () => {
     );
   }
 
-  // 🔹 Total payments amount
+  // Total payments amount
   const totalPaymentsAmount = payments.reduce(
     (sum, p) => sum + Number(p.amount || 0),
     0
@@ -151,8 +151,8 @@ export const AdminPanel = () => {
     <div className="p-6 space-y-8">
       <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
 
-      {/* 🔹 Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/*  Summary Cards */}
+      <div className="grid grid-cols-2 gap-6">
         <SummaryCard title="Total Users" value={users.length} />
         <SummaryCard title="Total Clubs" value={clubs.length} />
         <SummaryCard title="Total Memberships" value={memberships.length} />
@@ -162,7 +162,7 @@ export const AdminPanel = () => {
         />
       </div>
 
-      {/* 🔹 Memberships per Club Chart */}
+      {/*  Memberships per Club Chart */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-semibold mb-4">Memberships per Club</h2>
 
@@ -182,7 +182,7 @@ export const AdminPanel = () => {
         )}
       </div>
 
-      {/* 🔹 Quick Links */}
+      {/*  Quick Links */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <DashboardLink
           title="Manage Users"

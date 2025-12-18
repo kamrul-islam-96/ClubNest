@@ -43,7 +43,7 @@ export const MemberDashboard = () => {
   }, [user]);
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="pl-6 pr-4 space-y-8">
       <h1 className="text-3xl font-bold">
         Welcome, {user?.displayName || "Member"}
       </h1>
@@ -69,7 +69,7 @@ export const MemberDashboard = () => {
       {/* My Clubs */}
       <div>
         <h2 className="text-2xl font-semibold mb-4">My Clubs</h2>
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 grid-cols-2 gap-6">
           {myClubs.map((club) => (
             <div key={club.id} className="bg-white p-4 rounded-xl shadow">
               <h3 className="font-semibold">{club.name}</h3>
@@ -82,11 +82,11 @@ export const MemberDashboard = () => {
       </div>
 
       {/* Payment History */}
-      <div className="p-6">
+      <div className="p-0">
         <h2 className="text-2xl font-semibold mb-6">Payment History</h2>
         <div className="overflow-x-auto bg-white rounded-2xl shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+            <thead className="bg-linear-to-r from-blue-500 to-indigo-500 text-white">
               <tr>
                 <th className="px-6 py-3 text-left text-sm font-medium uppercase tracking-wider">
                   Amount

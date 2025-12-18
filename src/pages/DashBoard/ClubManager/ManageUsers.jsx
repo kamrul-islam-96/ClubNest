@@ -46,7 +46,7 @@ export const ManageUsers = () => {
       </h1>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <SummaryCard title="Total Clubs" value={totalClubs} />
         <SummaryCard title="Total Members" value={totalMembers} />
         <SummaryCard title="Total Events" value={totalEvents} />
