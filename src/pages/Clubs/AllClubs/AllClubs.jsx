@@ -5,18 +5,14 @@ import { AuthContext } from "../../../context/AuthContext/AuthContext";
 
 export const AllClubs = () => {
   const { user } = use(AuthContext);
-
+  
   const { data: clubs = [], isLoading, error } = useQuery({
     queryKey: ["allClubs"],
     queryFn: async () => {
-      const token = await user.getIdToken();
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/clubs`, {
-        headers: user
-          ? {
-              Authorization: `Bearer ${token}`,
-            }
-          : {},
-      });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/clubs`);
+      if (!res.ok) {
+        throw new Error("Failed to fetch clubs");
+      }
       return res.json();
     },
   });

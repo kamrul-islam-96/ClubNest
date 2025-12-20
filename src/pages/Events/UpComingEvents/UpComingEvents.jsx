@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { NavLink } from "react-router";
+import { Calendar, MapPin, Users, ArrowRight, Sparkles } from "lucide-react";
 
 export const UpComingEvents = () => {
   const [events, setEvents] = useState([]);
@@ -20,58 +21,110 @@ export const UpComingEvents = () => {
     fetchEvents();
   }, []);
 
-  if (loading) return <p className="p-6">Loading events...</p>;
+  // --- Awesome Skeleton Loader ---
+  if (loading) {
+    return (
+      <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div
+            key={i}
+            className="h-[350px] bg-gray-100 rounded-[2.5rem] animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
 
   if (events.length === 0)
-    return <p className="p-6 text-gray-500">No upcoming events.</p>;
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center text-gray-500 italic">
+        <Sparkles className="mb-2 text-gray-300" size={40} />
+        <p>No upcoming events at the moment.</p>
+      </div>
+    );
 
   return (
-    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="p-8 bg-[#fcfcfd] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {events.map((ev) => (
         <div
           key={ev._id}
-          className="border rounded-2xl shadow-md hover:shadow-xl transition p-5 flex flex-col justify-between bg-white"
+          className="group relative bg-white border border-gray-100 rounded-[2.5rem] p-7 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_25px_60px_rgba(59,130,246,0.12)] transition-all duration-500 flex flex-col justify-between overflow-hidden"
         >
-          <div className="flex justify-between items-start mb-3">
-            <h2 className="text-xl font-bold text-gray-800">{ev.title}</h2>
-            {ev.isPaid ? (
-              <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-semibold">
-                Paid
+          {/* Top Section: Title & Status */}
+          <div>
+            <div className="flex justify-between items-start mb-5">
+              <h2 className="text-2xl font-bold text-gray-800 leading-tight group-hover:text-blue-600 transition-colors duration-300">
+                {ev.title}
+              </h2>
+              <span
+                className={`shrink-0 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${
+                  ev.isPaid
+                    ? "bg-amber-50 text-amber-600 border-amber-100"
+                    : "bg-emerald-50 text-emerald-600 border-emerald-100"
+                }`}
+              >
+                {ev.isPaid ? "Paid" : "Free"}
               </span>
-            ) : (
-              <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold">
-                Free
-              </span>
-            )}
-          </div>
+            </div>
 
-          {ev.description && (
-            <p className="text-gray-600 mb-3 line-clamp-3">{ev.description}</p>
-          )}
-
-          <div className="text-gray-700 mb-3 space-y-1 text-sm">
-            <p>
-              <span className="font-semibold">Date:</span>{" "}
-              {new Date(ev.eventDate).toLocaleDateString()}
-            </p>
-            {ev.location && (
-              <p>
-                <span className="font-semibold">Location:</span> {ev.location}
+            {ev.description && (
+              <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-3 font-light">
+                {ev.description}
               </p>
             )}
-            <p>
-              <span className="font-semibold">Club:</span> {ev.clubName}
-            </p>
-            {ev.maxAttendees && (
-              <p>
-                <span className="font-semibold">Max Attendees:</span>{" "}
-                {ev.maxAttendees}
-              </p>
-            )}
+
+            {/* Event Meta Details */}
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-4 text-gray-600 group/item">
+                <div className="p-2.5 bg-gray-50 rounded-2xl group-hover/item:bg-blue-50 group-hover/item:text-blue-600 transition-all">
+                  <Calendar size={18} />
+                </div>
+                <span className="text-sm font-medium">
+                  {new Date(ev.eventDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+
+              {ev.location && (
+                <div className="flex items-center gap-4 text-gray-600 group/item">
+                  <div className="p-2.5 bg-gray-50 rounded-2xl group-hover/item:bg-rose-50 group-hover/item:text-rose-600 transition-all">
+                    <MapPin size={18} />
+                  </div>
+                  <span className="text-sm font-medium truncate">
+                    {ev.location}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-4 text-gray-600 group/item">
+                <div className="p-2.5 bg-gray-50 rounded-2xl group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-all">
+                  <Users size={18} />
+                </div>
+                <span className="text-sm font-medium italic">
+                  Hosted by {ev.clubName}
+                  {ev.maxAttendees && (
+                    <span className="not-italic text-gray-400 ml-2">
+                      ({ev.maxAttendees} max)
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <NavLink to={`/events/${ev._id}`} className="mt-auto px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
-            View / Register
+          {/* Action Button */}
+          <NavLink
+            to={`/events/${ev._id}`}
+            className="group/btn relative mt-auto flex items-center justify-center gap-3 w-full py-4 bg-gray-900 text-white rounded-3xl font-bold overflow-hidden transition-all duration-300 hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-200 active:scale-95"
+          >
+            <span className="z-10">Register Now</span>
+            <ArrowRight
+              size={18}
+              className="z-10 group-hover/btn:translate-x-2 transition-transform duration-300"
+            />
           </NavLink>
         </div>
       ))}

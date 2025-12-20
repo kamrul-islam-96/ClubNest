@@ -18,7 +18,7 @@ export const CreateClub = () => {
   const createClubMutation = useMutation({
     mutationFn: async (data) => {
       const token = await user.getIdToken();
-      const res = await fetch(`http://localhost:3000/clubs`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/clubs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export const CreateClub = () => {
     },
     onSuccess: () => {
       toast.success("Club created successfully");
-      queryClient.invalidateQueries(["myClubs"]); // refresh manager's club list
+      queryClient.invalidateQueries(["myClubs"]);
     },
     onError: () => {
       toast.error("Failed to create club");

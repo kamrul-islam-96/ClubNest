@@ -25,6 +25,7 @@ import { EventDetails } from "../pages/Events/EventDetails/EventDetails";
 import { EventsRegistrations } from "../pages/DashBoard/ClubManager/EventsRegistrations/EventsRegistrations";
 import { EditClub } from "../Components/EditClub";
 import { EditEvent } from "../Components/EditEvent";
+import ErrorPage from "../Components/ErrorPage";
 
 
 
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: MainLayout,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,

@@ -19,7 +19,7 @@ import { Link } from "react-router";
 /* FETCH */
 const fetchAllClubs = async () => {
   try {
-    const res = await fetch("http://localhost:3000/clubs");
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/clubs`);
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {

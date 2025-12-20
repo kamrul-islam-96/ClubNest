@@ -1,6 +1,7 @@
 import { use, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext/AuthContext";
+import toast from "react-hot-toast";
 
 
 export const CreateEvents = () => {
@@ -73,7 +74,7 @@ export const CreateEvents = () => {
         { ...form, clubId: selectedClub },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Event created!");
+      toast.success("Event created!");
       // Refresh events
       const updatedEvents = await axios.get(
         `${import.meta.env.VITE_API_URL}/events/manager`,

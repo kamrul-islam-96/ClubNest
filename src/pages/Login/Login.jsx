@@ -39,7 +39,7 @@ export const Login = () => {
       const user = result.user;
       const token = await user.getIdToken();
 
-      await fetch("http://localhost:3000/api/auth/save-user", {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/save-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

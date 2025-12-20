@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../../context/AuthContext/AuthContext";
 import axios from "axios";
+import { NavLink } from "react-router";
 
 export const MemberDashboard = () => {
   const { user } = useContext(AuthContext);
@@ -47,7 +48,6 @@ export const MemberDashboard = () => {
       <h1 className="text-3xl font-bold">
         Welcome, {user?.displayName || "Member"}
       </h1>
-
       {/* Summary */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-xl shadow">
@@ -59,11 +59,19 @@ export const MemberDashboard = () => {
           <p className="text-3xl font-bold">{summary.eventsRegistered || 0}</p>
         </div>
       </div>
-
       {/* Upcoming Events */}
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-xl font-semibold">Upcoming Events</h2>
-        <p className="text-gray-500">Events module is coming soon 🚧</p>
+      <div className="flex items-center justify-center">
+        <NavLink
+          to="/events"
+          className="bg-white p-4 rounded-xl border shadow-sm hover:shadow-md transition max-w-3xl w-full text-center"
+        >
+          <h2 className="text-lg font-semibold text-gray-800">
+            Upcoming Events
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            Events module is coming soon 🚧
+          </p>
+        </NavLink>
       </div>
 
       {/* My Clubs */}
@@ -80,7 +88,6 @@ export const MemberDashboard = () => {
           ))}
         </div>
       </div>
-
       {/* Payment History */}
       <div className="p-0">
         <h2 className="text-2xl font-semibold mb-6">Payment History</h2>
