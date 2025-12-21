@@ -35,7 +35,7 @@ export const Register = () => {
       const token = await firebaseUser.getIdToken();
 
       // Data save to MongoDB
-      await fetch("http://localhost:3000/api/auth/save-user", {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/save-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,7 +75,7 @@ export const Register = () => {
       const user = result.user;
       const token = await user.getIdToken();
 
-      await fetch("http://localhost:3000/api/auth/save-user", {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/auth/save-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
