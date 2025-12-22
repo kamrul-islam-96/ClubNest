@@ -1,8 +1,9 @@
-// components/EventCheckoutForm.jsx
-import { useState } from "react";
+// components/EventCheckoutForm.jsx - UPDATED
+import { useState, useEffect } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { toast } from "react-hot-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export const EventCheckoutForm = ({
   event,
@@ -13,12 +14,65 @@ export const EventCheckoutForm = ({
 }) => {
   const stripe = useStripe();
   const elements = useElements();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [cardError, setCardError] = useState("");
+  const [isFreeEvent, setIsFreeEvent] = useState(false);
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    // Check if event is actually free
+    const eventFee = Number(event.eventFee) || 0;
+    const freeEvent = !event.isPaid || eventFee === 0;
+    setIsFreeEvent(freeEvent);
+
+    if (freeEvent) {
+      // If free event, automatically register
+      handleFreeRegistration();
+    }
+  }, [event]);
+
+  const handleFreeRegistration = async () => {
+    if (!user || !registrationId) return;
+
+    setLoading(true);
+    try {
+      const token = await user.getIdToken();
+
+      // Confirm free registration
+      const confirmRes = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/event-registrations/${registrationId}/confirm`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ paymentId: "free_registration" }),
+        }
+      );
+
+      if (!confirmRes.ok) {
+        const error = await confirmRes.json();
+        throw new Error(error.message || "Registration failed");
+      }
+
+      toast.success("🎉 Successfully registered for free event!");
+      setTimeout(() => {
+        onSuccess();
+      }, 1500);
+    } catch (err) {
+      console.error("Free registration error:", err);
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaidPayment = async (e) => {
     e.preventDefault();
-    if (loading) return;
+    if (loading || !stripe || !elements) return;
 
     setLoading(true);
     setCardError("");
@@ -100,6 +154,40 @@ export const EventCheckoutForm = ({
     }
   };
 
+  // If free event, show success message
+  if (isFreeEvent) {
+    return (
+      <div className="mt-6 p-6 border rounded-xl bg-white shadow">
+        <div className="text-center p-8">
+          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="text-emerald-600" size={32} />
+          </div>
+          <h3 className="text-xl font-semibold mb-2 text-emerald-700">
+            Free Registration
+          </h3>
+          <p className="text-gray-600 mb-4">
+            This event is free to attend. No payment required.
+          </p>
+
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 text-gray-600">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Processing registration...</span>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate(`/events/${event._id}`)}
+              className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors"
+            >
+              Back to Event
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Paid event - show payment form
   return (
     <div className="mt-6 p-6 border rounded-xl bg-white shadow">
       <div className="mb-4">
@@ -110,7 +198,7 @@ export const EventCheckoutForm = ({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handlePaidPayment} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Card Details</label>
           <CardElement
@@ -149,7 +237,8 @@ export const EventCheckoutForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300"
+            disabled={loading}
+            className="px-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 disabled:opacity-50"
           >
             Cancel
           </button>
